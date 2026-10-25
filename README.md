@@ -48,9 +48,22 @@ If any of this is not acceptable for your setup, keep the option off, or give th
 
 ## Install
 
-### From a build
+### From the plugin repository (recommended)
 
-1. Build the plugin (see below) or take `Jellyfin.Plugin.PasswordlessLogin.dll` from a release.
+1. In Jellyfin, open *Dashboard > Plugins > Manage repositories* (*Tableau de bord > Extensions > Gérer les
+   dépôts*) and add a repository:
+   - Name: `Passwordless Login`
+   - URL: `https://raw.githubusercontent.com/nestebe/jellyfin-plugin-passwordless-login/master/manifest.json`
+2. Go back to the plugin catalogue, open **Passwordless Login** (category *Authentication*) and install it.
+3. Restart Jellyfin.
+4. Open the plugin's settings, read the warning, tick **Enable one-click login...** and save.
+
+Updates show up in the catalogue like any other plugin.
+
+### Manually
+
+1. Build the plugin (see below) or download the zip from the
+   [releases](https://github.com/nestebe/jellyfin-plugin-passwordless-login/releases) and extract the DLL.
 2. Stop Jellyfin.
 3. Create a folder `PasswordlessLogin_1.0.0.0` in the server's `plugins` directory
    (for example `%LOCALAPPDATA%\jellyfin\plugins` on Windows, `/var/lib/jellyfin/plugins` on Debian/Ubuntu,
@@ -97,8 +110,19 @@ Follows [jellyfin-plugin-template](https://github.com/jellyfin/jellyfin-plugin-t
 - `Jellyfin.Plugin.PasswordlessLogin/Configuration/`: plugin options and the dashboard page.
 - `Jellyfin.Plugin.PasswordlessLogin.Tests/`: unit tests (local vs remote, password vs none, external provider,
   option off, lazy result materialization, DI registration).
-- `build.yaml`: metadata for [jprm](https://github.com/oddstr13/jellyfin-plugin-repository-manager) if you
-  want to publish it in a plugin repository.
+- `build.yaml`: release metadata (version, targetAbi, changelog).
+- `manifest.json`: the plugin repository manifest that Jellyfin servers read.
+- `release.ps1`: release script (see below).
+
+## Releasing a new version
+
+Requires PowerShell 7 and the GitHub CLI, logged in.
+
+1. Bump `version` (and `targetAbi` if needed) and write the `changelog` in `build.yaml`.
+2. Run `./release.ps1` (or `./release.ps1 -DryRun` to only build, test and zip). It runs the tests, zips the
+   DLL, creates the GitHub release `v<version>` with the zip attached and adds the version, with the zip's MD5
+   checksum, to `manifest.json`.
+3. Commit and push `manifest.json` (and `build.yaml`): servers see the update on their next catalogue refresh.
 
 ## License
 
