@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Passwordless Login</title>
+</head>
+<body>
+    <div id="PasswordlessLoginConfigPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-button,emby-checkbox">
+        <div data-role="content">
+            <div class="content-primary">
+                <form id="PasswordlessLoginConfigForm">
+                    <div class="verticalSection">
+                        <h2 class="sectionTitle">Passwordless Login</h2>
+                        <p>
+                            Lets users that have <strong>no password</strong> log in with a single click on the login
+                            screen, as in Jellyfin 10.x. Only applies to requests from the local network and to users
+                            authenticated by the built-in provider (not LDAP, SSO, etc.).
+                        </p>
+                    </div>
+                    <div class="verticalSection" style="border-left: 4px solid #e67e22; padding: 0.5em 1em; margin-bottom: 1.5em;">
+                        <h3 style="margin-top: 0;">Security warning</h3>
+                        <ul>
+                            <li>Anyone on your local network (including guests on your Wi-Fi) can open these accounts without typing anything.</li>
+                            <li>The login screen will reveal which visible accounts have no password.</li>
+                            <li>Passwordless accounts were already reachable with an empty password; this plugin only makes it a one-click action again.</li>
+                            <li>Behind a reverse proxy, make sure the proxy is listed in <em>Networking &gt; Known proxies</em>, otherwise every request may look local (or remote).</li>
+                            <li>Only give a passwordless account to users with limited permissions (no administration, no deletion, parental controls as needed).</li>
+                        </ul>
+                    </div>
+                    <div class="checkboxContainer checkboxContainer-withDescription">
+                        <label class="emby-checkbox-label">
+                            <input id="EnablePasswordlessLogin" name="EnablePasswordlessLogin" type="checkbox" is="emby-checkbox" />
+                            <span>Enable one-click login for passwordless users on the local network</span>
+                        </label>
+                        <div class="fieldDescription checkboxFieldDescription">Disabled by default. Takes effect immediately, no restart needed.</div>
+                    </div>
+                    <div>
+                        <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+                            <span>Save</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script type="text/javascript">
+            var PasswordlessLoginConfig = {
+                pluginUniqueId: '1cdfebe7-3d15-47e5-83b8-25e9520438c9'
+            };
+
+            document.querySelector('#PasswordlessLoginConfigPage')
+                .addEventListener('pageshow', function() {
+                    Dashboard.showLoadingMsg();
+                    ApiClient.getPluginConfiguration(PasswordlessLoginConfig.pluginUniqueId).then(function (config) {
+                        document.querySelector('#EnablePasswordlessLogin').checked = config.EnablePasswordlessLogin;
+                        Dashboard.hideLoadingMsg();
+                    });
+                });
+
+            document.querySelector('#PasswordlessLoginConfigForm')
+                .addEventListener('submit', function(e) {
+                Dashboard.showLoadingMsg();
+                ApiClient.getPluginConfiguration(PasswordlessLoginConfig.pluginUniqueId).then(function (config) {
+                    config.EnablePasswordlessLogin = document.querySelector('#EnablePasswordlessLogin').checked;
+                    ApiClient.updatePluginConfiguration(PasswordlessLoginConfig.pluginUniqueId, config).then(function (result) {
+                        Dashboard.processPluginConfigurationUpdateResult(result);
+                    });
+                });
+
+                e.preventDefault();
+                return false;
+            });
+        </script>
+    </div>
+</body>
+</html>

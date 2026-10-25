@@ -1,0 +1,19 @@
+---
+name: "Passwordless Login"
+guid: "1cdfebe7-3d15-47e5-83b8-25e9520438c9"
+version: "1.0.0.0"
+targetAbi: "12.3.0.0"
+framework: "net10.0"
+overview: "Restore one-click login for passwordless users on the local network"
+description: >
+  Since Jellyfin 12, GET /Users/Public always reports HasPassword = true, so the
+  web client asks for a password even for accounts that have none. When enabled,
+  this plugin reports HasPassword = false again for users that use the default
+  authentication provider and have no password, but only for requests coming
+  from the local network. Disabled by default.
+category: "Authentication"
+owner: "Nicolas"
+artifacts:
+- "Jellyfin.Plugin.PasswordlessLogin.dll"
+changelog: >
+  Initial release.

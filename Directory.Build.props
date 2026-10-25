@@ -1,0 +1,13 @@
+<Project>
+    <PropertyGroup>
+        <Version>1.0.0.0</Version>
+        <AssemblyVersion>1.0.0.0</AssemblyVersion>
+        <FileVersion>1.0.0.0</FileVersion>
+        <!--
+          Version of the Jellyfin.Controller / Jellyfin.Model NuGet packages to build against.
+          12.3.0 is the newest version published on nuget.org (server master is 13.0.0 but is not published).
+          Override with: dotnet build -p:JellyfinVersion=x.y.z
+        -->
+        <JellyfinVersion Condition="'$(JellyfinVersion)' == ''">12.3.0</JellyfinVersion>
+    </PropertyGroup>
+</Project>
