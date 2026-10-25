@@ -1,7 +1,50 @@
 # Jellyfin Passwordless Login plugin
 
+[![Latest release](https://img.shields.io/github/v/release/nestebe/jellyfin-plugin-passwordless-login)](https://github.com/nestebe/jellyfin-plugin-passwordless-login/releases/latest)
+![Jellyfin 12.3+](https://img.shields.io/badge/Jellyfin-12.3%2B-00a4dc)
+[![License: GPL-3.0](https://img.shields.io/badge/license-GPL--3.0-blue)](LICENSE)
+
 Restores **one-click login** for accounts that have no password (a guest account on a shared TV, a kids
-profile, ...) when the login screen is opened from your **local network**.
+profile, ...) when the login screen is opened from your **local network**. Off by default.
+
+## Install
+
+1. In Jellyfin, open **Dashboard > Plugins > Manage repositories**
+   (*Tableau de bord > Extensions > Gérer les dépôts*) and add a repository with this URL:
+
+   ```text
+   https://raw.githubusercontent.com/nestebe/jellyfin-plugin-passwordless-login/master/manifest.json
+   ```
+
+   Any name works, for example `Passwordless Login`.
+2. In the plugin catalogue, open **Passwordless Login** (category *Authentication*) and click **Install**.
+3. Restart Jellyfin.
+4. Open the plugin's settings, read the [security warning](#security-trade-off), tick
+   **Enable one-click login for passwordless users on the local network** and save. No restart needed.
+5. Make sure the guest account has no password and is not hidden from the login screen
+   (user settings > *Hide this user from login screens* unticked).
+
+Updates show up in the catalogue like any other plugin. Requires Jellyfin **12.3 or newer**.
+
+<details>
+<summary>Manual install (without the repository)</summary>
+
+1. Download `passwordless-login_<version>.zip` from the
+   [latest release](https://github.com/nestebe/jellyfin-plugin-passwordless-login/releases/latest).
+2. Stop Jellyfin.
+3. Extract the zip into a new folder `PasswordlessLogin` inside the server's `plugins` directory:
+   - Windows: `%LOCALAPPDATA%\jellyfin\plugins`
+   - Debian / Ubuntu: `/var/lib/jellyfin/plugins`
+   - Official Docker image: `/config/plugins`
+4. Start Jellyfin, then enable the option as in step 4 above.
+
+</details>
+
+## Uninstall
+
+Remove it from **Dashboard > Plugins** and restart Jellyfin. On removal the plugin turns one-click login off
+immediately (without waiting for the restart) and deletes its settings file, so a later reinstall starts
+disabled again. It never changes users, passwords or the database: nothing else is left behind.
 
 ## Why
 
@@ -26,7 +69,6 @@ user in that response it sets `HasPassword = false` when **all** of the followin
 
 Nothing else changes: authentication itself is still done by Jellyfin. A passwordless user could already log
 in by submitting an empty password; this plugin only tells the web client that it may do so for them.
-Changing the option takes effect immediately, without a restart.
 
 ## Security trade-off
 
@@ -46,83 +88,52 @@ Read this before enabling the option.
 If any of this is not acceptable for your setup, keep the option off, or give the account a password and use
 *Quick Connect* or the client's "remember me" instead.
 
-## Install
-
-### From the plugin repository (recommended)
-
-1. In Jellyfin, open *Dashboard > Plugins > Manage repositories* (*Tableau de bord > Extensions > Gérer les
-   dépôts*) and add a repository:
-   - Name: `Passwordless Login`
-   - URL: `https://raw.githubusercontent.com/nestebe/jellyfin-plugin-passwordless-login/master/manifest.json`
-2. Go back to the plugin catalogue, open **Passwordless Login** (category *Authentication*) and install it.
-3. Restart Jellyfin.
-4. Open the plugin's settings, read the warning, tick **Enable one-click login...** and save.
-
-Updates show up in the catalogue like any other plugin.
-
-### Manually
-
-1. Build the plugin (see below) or download the zip from the
-   [releases](https://github.com/nestebe/jellyfin-plugin-passwordless-login/releases) and extract the DLL.
-2. Stop Jellyfin.
-3. Create a folder `PasswordlessLogin_1.0.0.0` in the server's `plugins` directory
-   (for example `%LOCALAPPDATA%\jellyfin\plugins` on Windows, `/var/lib/jellyfin/plugins` on Debian/Ubuntu,
-   `/config/plugins` in the official Docker image) and copy the DLL into it.
-4. Start Jellyfin. The plugin shows up in *Dashboard > Plugins* as **Passwordless Login**.
-5. Open its settings, read the warning, tick **Enable one-click login...** and save.
-
-### Compatibility
-
-| Plugin | Built against | Server |
-|--------|---------------|--------|
-| 1.0.0.0 | `Jellyfin.Controller` 12.3.0, `net10.0` (`targetAbi` 12.3.0.0) | 12.3 or newer (tested on 13.0.0 / master) |
-
-Server master is 13.0.0, but that version of `Jellyfin.Controller` is not published on NuGet, so the plugin
-builds against 12.3.0, the newest published package. The APIs it uses are the same on master. To build against
-another version:
-
-```bash
-dotnet build -c Release -p:JellyfinVersion=12.3.0
-```
-
-## Build and test
+## Development
 
 Requires the .NET 10 SDK.
-
-```bash
-dotnet build -c Release
-```
 
 ```bash
 dotnet test
 ```
 
+```bash
+dotnet build -c Release
+```
+
 The DLL is written to `Jellyfin.Plugin.PasswordlessLogin/bin/Release/net10.0/`.
 
-## Layout
+The plugin builds against `Jellyfin.Controller` **12.3.0**, the newest version published on NuGet (server
+master is 13.0.0 but is not published; the APIs used are the same). The version is set by `JellyfinVersion`
+in `Directory.Build.props`.
+
+### Layout
 
 Follows [jellyfin-plugin-template](https://github.com/jellyfin/jellyfin-plugin-template):
 
-- `Jellyfin.Plugin.PasswordlessLogin/Plugin.cs`: plugin entry point and config page registration.
+- `Jellyfin.Plugin.PasswordlessLogin/Plugin.cs`: plugin entry point, config page, cleanup on uninstall.
 - `Jellyfin.Plugin.PasswordlessLogin/PluginServiceRegistrator.cs`: registers the filter as a global MVC filter
   (`IPluginServiceRegistrator`, run before the server's host is built).
 - `Jellyfin.Plugin.PasswordlessLogin/Filters/PublicUsersPasswordlessFilter.cs`: the filter.
 - `Jellyfin.Plugin.PasswordlessLogin/Configuration/`: plugin options and the dashboard page.
-- `Jellyfin.Plugin.PasswordlessLogin.Tests/`: unit tests (local vs remote, password vs none, external provider,
-  option off, lazy result materialization, DI registration).
+- `Jellyfin.Plugin.PasswordlessLogin.Tests/`: unit tests.
 - `build.yaml`: release metadata (version, targetAbi, changelog).
 - `manifest.json`: the plugin repository manifest that Jellyfin servers read.
-- `release.ps1`: release script (see below).
+- `release.ps1`: release script.
 
-## Releasing a new version
+### Releasing a new version
 
 Requires PowerShell 7 and the GitHub CLI, logged in.
 
 1. Bump `version` (and `targetAbi` if needed) and write the `changelog` in `build.yaml`.
-2. Run `./release.ps1` (or `./release.ps1 -DryRun` to only build, test and zip). It runs the tests, zips the
-   DLL, creates the GitHub release `v<version>` with the zip attached and adds the version, with the zip's MD5
-   checksum, to `manifest.json`.
-3. Commit and push `manifest.json` (and `build.yaml`): servers see the update on their next catalogue refresh.
+2. Run the release script. It runs the tests, zips the DLL, creates the GitHub release `v<version>` with the zip
+   attached and adds the version, with the zip's MD5 checksum, to `manifest.json`:
+
+   ```bash
+   pwsh ./release.ps1
+   ```
+
+   Add `-DryRun` to only build, test and zip.
+3. Commit and push `manifest.json` and `build.yaml`: servers see the update on their next catalogue refresh.
 
 ## License
 

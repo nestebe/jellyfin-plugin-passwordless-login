@@ -1,7 +1,7 @@
 ---
 name: "Passwordless Login"
 guid: "1cdfebe7-3d15-47e5-83b8-25e9520438c9"
-version: "1.0.0.0"
+version: "1.0.1.0"
 targetAbi: "12.3.0.0"
 framework: "net10.0"
 overview: "Restore one-click login for passwordless users on the local network"
@@ -16,4 +16,5 @@ owner: "nestebe"
 artifacts:
 - "Jellyfin.Plugin.PasswordlessLogin.dll"
 changelog: >
-  Initial release.
+  Uninstalling turns one-click login off immediately and deletes the plugin settings,
+  so a later reinstall starts disabled again.
