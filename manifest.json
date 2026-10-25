@@ -1,0 +1,11 @@
+[
+  {
+    "guid": "1cdfebe7-3d15-47e5-83b8-25e9520438c9",
+    "name": "Passwordless Login",
+    "description": "Since Jellyfin 12, GET /Users/Public always reports HasPassword = true, so the web client asks for a password even for accounts that have none. When enabled, this plugin reports HasPassword = false again for users that use the default authentication provider and have no password, but only for requests coming from the local network. Disabled by default: read the security warning on the settings page before enabling it.",
+    "overview": "Restore one-click login for passwordless users on the local network",
+    "owner": "nestebe",
+    "category": "Authentication",
+    "versions": []
+  }
+]
