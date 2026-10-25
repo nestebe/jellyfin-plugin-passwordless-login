@@ -12,7 +12,7 @@ description: >
   authentication provider and have no password, but only for requests coming
   from the local network. Disabled by default.
 category: "Authentication"
-owner: "Nicolas"
+owner: "nestebe"
 artifacts:
 - "Jellyfin.Plugin.PasswordlessLogin.dll"
 changelog: >
